@@ -4,6 +4,7 @@
 <head>
     <title></title>
     <style>
+        @import url('https://fonts.googleapis.com/css?family=Orbitron');
         html,
         body {
             height: 100%;
@@ -11,6 +12,7 @@
         }
 
         body {
+            font-family: 'Orbitron', sans-serif;
             background: black;
             /*display: flex;*/
             align-items: center;
@@ -18,9 +20,11 @@
             color: aliceblue;
         }
 
-        canvas {
+        canvas,
+        #top-players {
             border: 1px solid white;
             display: block;
+            padding: 10px;
         }
 
         #controls {
@@ -34,6 +38,8 @@
 
         #menu {
             display: block;
+            padding: 10px;
+            width: 400px;
         }
 
         .hidden {
@@ -53,17 +59,44 @@
             padding: 5px;
             margin: 5px;
         }
+
+        #top-players {
+            width: 400px;
+        }
+        .top-bar{
+            border-top: solid white 2px;
+        }
     </style>
 </head>
 
 <body>
-    <div id="menu">
-        <h2>Viimeisin tulos</h2>
-        <h2 id="last-result"></h2>
+    <h1>Ultimaattinen Matopeli</h1>
+    <div id="menu" class="top-bar">
         <button id="start">Aloita</button>
         <button id="stop">Lopeta</button>
+        <h3>Viimeisin tulos</h3>
+        <p id="last-result"></p>
+
     </div>
-    <canvas width="400" height="400" id="game"></canvas>
+    <div id="game-div">
+        <canvas width="400" height="400" id="game"></canvas>
+        <h2>Score</h2>
+        <h2 id="score">0</h2>
+    </div>
+    <div id="top-players">
+        <H2>Kärki Pelaajat</H2>
+        <div class="top-bar">
+            <h2>Tallenna tulos</h2>
+            <label>Pisteet:</label>
+            <label id="save-result"></label>
+            <br>
+            <label>Nimimerkki</label>
+            <input type="text">
+            <button>Tallenna</button>
+        </div>
+    </div>
+    <p>tehnyt Late pohjalla <a href="https://gist.github.com/straker/ff00b4b49669ad3dec890306d348adc4" target="_blank">Straker tekemä matopeli</a></p>
+
     <!--
     <div id="controls">
         <button id="up">^</button>
@@ -73,8 +106,7 @@
                 <button id="down">v</button>
     </div>
     -->
-    <h2>Score</h2>
-    <h2 id="score">0</h2>
+
     <script>
         document.addEventListener("DOMContentLoaded", function (event) {
             var canvas = document.getElementById('game');
@@ -84,16 +116,15 @@
             const start = document.querySelector("#start");
             const stop = document.querySelector("#stop");
             let lastResult = document.querySelector("#last-result");
-            canvas.classList.add("hidden");
+            let saveResult = document.querySelector("#save-result");
+            const gameDiv = document.querySelector("#game-div");
+            gameDiv.classList.add("hidden");
             start.addEventListener('click', function (e) {
-                canvas.classList.remove("hidden");
+                gameDiv.classList.remove("hidden");
 
             });
             stop.addEventListener('click', function (e) {
-                
                 resetGame();
-                score.textContent = "0";
-                
             });
 
             var grid = 16;
@@ -168,10 +199,11 @@
                 });
             }
             function resetGame() {
-                if(snake.maxCells !=4){
+                if (snake.maxCells != 4) {
                     lastResult.textContent = snake.maxCells;
+                    saveResult.textContent = snake.maxCells;
                 }
-                canvas.classList.add("hidden"); 
+                gameDiv.classList.add("hidden");
                 snake.x = 160;
                 snake.y = 160;
                 snake.cells = [];
@@ -180,7 +212,9 @@
                 snake.dy = 0;
                 apple.x = getRandomInt(0, 25) * grid;
                 apple.y = getRandomInt(0, 25) * grid;
+                score.textContent = "0";
             }
+            /*
             document.addEventListener('keydown', function (e) {
                 // prevent snake from backtracking on itself
                 //left
@@ -204,7 +238,44 @@
                     snake.dy = grid;
                     snake.dx = 0;
                 }
-            });
+            });*/
+            window.addEventListener("keydown", function (event) {
+                if (event.defaultPrevented) {
+                    return; // Do nothing if the event was already processed
+                }
+
+                switch (event.key) {
+                    case "ArrowDown":
+                        if (snake.dy === 0) {
+                            snake.dy = grid;
+                            snake.dx = 0;
+                        }
+                        break;
+                    case "ArrowUp":
+                        if (snake.dy === 0) {
+                            snake.dy = -grid;
+                            snake.dx = 0;
+                        }
+                        break;
+                    case "ArrowLeft":
+                        if (snake.dx === 0) {
+                            snake.dx = -grid;
+                            snake.dy = 0;
+                        }
+                        break;
+                    case "ArrowRight":
+                        if (snake.dx === 0) {
+                            snake.dx = grid;
+                            snake.dy = 0;
+                        }
+                        break;
+                    default:
+                        return; // Quit when this doesn't handle the key event.
+                }
+
+                // Cancel the default action to avoid it being handled twice
+                event.preventDefault();
+            }, true);
             /*
             const up = document.querySelector("#up");
             const down = document.querySelector("#down");
