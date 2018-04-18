@@ -30,8 +30,8 @@
         #controls {
             display: flex;
             flex-wrap: wrap;
-            width: 75px;
-            height: 75px;
+            width: 200px;
+            height: 50px;
 
 
         }
@@ -39,7 +39,7 @@
         #menu {
             display: block;
             padding: 10px;
-            width: 400px;
+            width: 300px;
         }
 
         .hidden {
@@ -48,23 +48,83 @@
 
         #up,
         #down {
-            width: 50px;
-            padding: 5px;
-            margin: 5px;
+            width: 100%;
+            height: 100%;
         }
 
         #left,
         #right {
-            width: 20px;
-            padding: 5px;
-            margin: 5px;
+            width: 100%;
+            height: 100%;
         }
 
         #top-players {
-            width: 400px;
+            width: 300px;
         }
-        .top-bar{
+
+        .top-bar {
             border-top: solid white 2px;
+        }
+
+        .grid-container {
+            display: grid;
+            width: 100px;
+            grid-gap: 5px;
+            padding: 5px;
+        }
+
+        .grid-item {
+            text-align: center;
+            padding: 5px;
+        }
+
+        .item1 {
+            grid-column: 2;
+            grid-row: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        .item3 {
+            grid-column: 1;
+            grid-row: 2;
+            width: 100%;
+            height: 100%;
+        }
+
+        .item4 {
+            grid-column: 3;
+            grid-row: 2;
+            width: 100%;
+            height: 100%;
+        }
+
+        .item6 {
+            grid-column: 2;
+            grid-row: 2;
+            width: 100%;
+            height: 100%;
+        }
+
+        .item5 {
+            grid-column: 2;
+            grid-row: 3;
+            width: 100%;
+            height: 100%;
+        }
+        .item7{
+            grid-column: 4;
+            grid-row: 1 /span 3;
+            width: 100%;
+            height: 100%;
+            
+        }
+        button{
+            border: 1px white solid;
+            background-color: black;
+            color: white;
+            border-radius: 2px;
+            font-family: 'Orbitron', sans-serif;
         }
     </style>
 </head>
@@ -79,9 +139,32 @@
 
     </div>
     <div id="game-div">
-        <canvas width="400" height="400" id="game"></canvas>
-        <h2>Score</h2>
-        <h2 id="score">0</h2>
+        <canvas width="250" height="250" id="game"></canvas>
+
+        <div class="grid-container">
+            <div class="grid-item item1">
+                <button id="up">^</button>
+            </div>
+            <div class="grid-item item3">
+                <button id="left">
+                    <</button>
+            </div>
+            <div class="grid-item item6"></div>
+            <div class="grid-item item4">
+                <button id="right">></button>
+            </div>
+            <div class="grid-item item5">
+                <button id="down">v</button>
+            </div>
+            <div class="grid-item item7">
+                <h2>Score</h2>
+                <h2 id="score">0</h2>
+            </div>
+
+        </div>
+
+
+
     </div>
     <div id="top-players">
         <H2>Kärki Pelaajat</H2>
@@ -95,20 +178,17 @@
             <button>Tallenna</button>
         </div>
     </div>
-    <p>tehnyt Late pohjalla <a href="https://gist.github.com/straker/ff00b4b49669ad3dec890306d348adc4" target="_blank">Straker tekemä matopeli</a></p>
+    <p>by
+        <a href="https://github.com/laurinie/matopeli" target="_blank">Late</a>
+    </p>
 
-    <!--
-    <div id="controls">
-        <button id="up">^</button>
-        <button id="left">
-            <</button>
-                <button id="right">></button>
-                <button id="down">v</button>
-    </div>
-    -->
+
+
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function (event) {
+
             var canvas = document.getElementById('game');
             var context = canvas.getContext('2d');
             let score = document.querySelector("#score");
@@ -127,10 +207,11 @@
                 resetGame();
             });
 
-            var grid = 16;
+
+            var grid = canvas.width / 25;
             var snake = {
-                x: 160,
-                y: 160,
+                x: grid * 10,
+                y: grid * 10,
                 dx: grid,
                 dy: 0,
                 cells: [],
@@ -138,8 +219,8 @@
             };
             var count = 0;
             var apple = {
-                x: 320,
-                y: 320
+                x: grid * 10 * 2,
+                y: grid * 10 * 2
             };
             function getRandomInt(min, max) {
                 return Math.floor(Math.random() * (max - min)) + min;
@@ -204,8 +285,8 @@
                     saveResult.textContent = snake.maxCells;
                 }
                 gameDiv.classList.add("hidden");
-                snake.x = 160;
-                snake.y = 160;
+                snake.x = grid * 10;
+                snake.y = grid * 10;
                 snake.cells = [];
                 snake.maxCells = 4;
                 snake.dx = grid;
@@ -276,7 +357,7 @@
                 // Cancel the default action to avoid it being handled twice
                 event.preventDefault();
             }, true);
-            /*
+
             const up = document.querySelector("#up");
             const down = document.querySelector("#down");
             const left = document.querySelector("#left");
@@ -308,8 +389,10 @@
                     snake.dy = 0;
                 }
             });
-    */
+
             requestAnimationFrame(loop);
+
+
         });
     </script>
 </body>
