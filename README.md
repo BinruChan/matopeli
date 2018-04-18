@@ -1,6 +1,6 @@
-# matopeli
+# Matopeli
 
-No copyrights
+No copyrights, feel free to use and modify.
 
 Made for localscoutgroups blog for younger readers.
 
