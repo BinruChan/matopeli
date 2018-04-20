@@ -112,14 +112,16 @@
             width: 100%;
             height: 100%;
         }
-        .item7{
+
+        .item7 {
             grid-column: 4;
             grid-row: 1 /span 3;
             width: 100%;
             height: 100%;
-            
+
         }
-        button{
+
+        button {
             border: 1px white solid;
             background-color: black;
             color: white;
@@ -162,33 +164,28 @@
             </div>
 
         </div>
-
-
-
     </div>
     <div id="top-players">
         <H2>Kärki Pelaajat</H2>
+        <ol id="scoreboard">
+
+        </ol>
         <div class="top-bar">
             <h2>Tallenna tulos</h2>
             <label>Pisteet:</label>
             <label id="save-result"></label>
             <br>
             <label>Nimimerkki</label>
-            <input type="text">
-            <button>Tallenna</button>
+            <input id="name" type="text">
+            <button id="save-btn">Tallenna</button>
         </div>
     </div>
     <p>by
         <a href="https://github.com/laurinie/matopeli" target="_blank">Late</a>
     </p>
-
-
-
-
-
     <script>
         document.addEventListener("DOMContentLoaded", function (event) {
-
+            const url = "https://api.rigo-v.xyz/score/snake/";
             var canvas = document.getElementById('game');
             var context = canvas.getContext('2d');
             let score = document.querySelector("#score");
@@ -198,6 +195,7 @@
             let lastResult = document.querySelector("#last-result");
             let saveResult = document.querySelector("#save-result");
             const gameDiv = document.querySelector("#game-div");
+            const saveBtn = document.querySelector("#save-btn");
             gameDiv.classList.add("hidden");
             start.addEventListener('click', function (e) {
                 gameDiv.classList.remove("hidden");
@@ -205,6 +203,9 @@
             });
             stop.addEventListener('click', function (e) {
                 resetGame();
+            });
+            saveBtn.addEventListener('click', function (e) {
+                saveScore();
             });
 
 
@@ -295,31 +296,6 @@
                 apple.y = getRandomInt(0, 25) * grid;
                 score.textContent = "0";
             }
-            /*
-            document.addEventListener('keydown', function (e) {
-                // prevent snake from backtracking on itself
-                //left
-                e.preventDefault();
-                if (e.which === 37 && snake.dx === 0) {
-                    snake.dx = -grid;
-                    snake.dy = 0;
-                }
-                //up
-                else if (e.which === 38 && snake.dy === 0) {
-                    snake.dy = -grid;
-                    snake.dx = 0;
-                }
-                //right
-                else if (e.which === 39 && snake.dx === 0) {
-                    snake.dx = grid;
-                    snake.dy = 0;
-                }
-                //down
-                else if (e.which === 40 && snake.dy === 0) {
-                    snake.dy = grid;
-                    snake.dx = 0;
-                }
-            });*/
             window.addEventListener("keydown", function (event) {
                 if (event.defaultPrevented) {
                     return; // Do nothing if the event was already processed
@@ -389,8 +365,46 @@
                     snake.dy = 0;
                 }
             });
-
+            getScores();
             requestAnimationFrame(loop);
+
+            function getScores() {
+                const scoreboard = document.querySelector("#scoreboard");
+                let childs = scoreboard.childNodes;
+                while (scoreboard.firstChild) {
+                    scoreboard.removeChild(scoreboard.firstChild);
+                }
+                const processJSON = (function (json) {
+                    for (let item of json) {
+                        const score = document.createElement("li");
+                        console.log(item.name + " " + item.score);
+                        score.textContent = item.name + " " + item.score;
+                        scoreboard.appendChild(score);
+                    }
+                });
+                fetch(url)
+                    .then(response => response.json())    //Returns a promise that resolves JSON object
+                    .then(processJSON)
+                    .catch(error => (console.log("Fetch crashed due to " + error)));
+
+            }
+            function saveScore() {
+                let name = document.querySelector("#name");
+                let userName = name.value;
+                let score = saveResult.textContent;
+                console.log(userName + " " + score);
+
+                if (name !== null) {
+                    return fetch(url, {
+                        headers: new Headers({
+                            'Content-Type': 'application/x-www-form-urlencoded', // <-- Specifying the Content-Type
+                        }),
+                        body: `name=${userName}&score=${score}`,
+                        method: 'POST'
+                    })
+                        .then(function (result) { getScores(); return true; })
+                }
+            }
 
 
         });
