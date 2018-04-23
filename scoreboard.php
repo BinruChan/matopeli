@@ -6,7 +6,7 @@ header("Content-Type: application/json; charset: utf-8");
 // Database configuration
 $host = "localhost";
 $user = "score";
-$password = "3a23d998208fcc0f5f108caea7ebb846dbc2cce11e6eef07616cc062fd58f07c";
+$password = "";
 $database = "score";
 $table = "snake";
 
@@ -17,12 +17,14 @@ $dblink = mysqli_connect($host, $user, $password, $database);
 
 // Check if connection failed
 if (mysqli_connect_errno($dblink)) {
+	
 	die();
 }
 
 
 switch ($_SERVER["REQUEST_METHOD"]) {
 	case "GET":
+		
 		// Query the top 4 scores from the database
 		$result = mysqli_query($dblink, "SELECT name, score FROM ".$table." ORDER by score DESC LIMIT 4");
 		
@@ -30,18 +32,21 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 		$i = 1;
 		$top5[0] = array("name"=>"Ossi Portaankorva");
 		while ($row = mysqli_fetch_assoc($result)) {
+			
 			$top5[$i] = $row;
 			$i = $i + 1;
 		}
 		
+		
 		// Add "Ossi Portaankorva"
 		if ($top5[1]["score"] < 50) {
+			
 			$top5[0] = array(
 				"name" => "Ossi Portaankorva",
 				"score" => "54"
 			);
-			
 		} else {
+			
 			$top5[0] = array(
 				"name" => "Ossi Portaankorva",
 				"score" => strval(ceil($top5[1]["score"]/9 + 1)*9)
@@ -54,15 +59,30 @@ switch ($_SERVER["REQUEST_METHOD"]) {
 		break;
 	
 	case "POST":
-		// Sanitize the inputs and insert them to the database
-		$name = "'". mysqli_real_escape_string($dblink, $_POST["name"]) ."'";
-		$score = "'". mysqli_real_escape_string($dblink, $_POST["score"]) ."'";
-		mysqli_query($dblink, "INSERT INTO `snake` (`name`, `score`) VALUES (".$name.",".$score.")");
+		
+		// Sanitize the inputs
+		$name = mysqli_real_escape_string($dblink, $_POST["name"]);
+		$score = mysqli_real_escape_string($dblink, $_POST["score"]);
+		
+		
+		// Get the best score by the player from the database
+		$oldscore = mysqli_fetch_assoc(mysqli_query($dblink, "SELECT score FROM `".$table."` WHERE name='".$name."' ORDER by score DESC LIMIT 1"))["score"];
+		
+		
+		// Insert the new score to the database only if it is better than the old one
+		if ($score > $oldscore) {
+			
+			// Insert the new score to the database
+			mysqli_query($dblink, "INSERT INTO `".$table."` (`name`, `score`) VALUES ('".$name."','".$score."')");
+			
+			// Delete the player's old score
+			mysqli_query($dblink, "DELETE FROM `".$table."` WHERE name='".$name."' AND score<'".$score."'");
+		}
 		
 		break;
-	
+
 }
-	
+
 mysqli_close($dblink);
 
 ?>
